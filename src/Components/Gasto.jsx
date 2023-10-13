@@ -10,6 +10,7 @@ const diccionarioIconos = {
     Alimentacion: iconsComida,
     Salud: iconsSalud,
     Gasto: iconsGasto
+    
 }
 
 const Gasto = ({gasto}) => {
