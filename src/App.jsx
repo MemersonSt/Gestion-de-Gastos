@@ -4,14 +4,21 @@ import IconNuevoGastos from "./img/nuevo-gasto.svg"
 import Modal from "./Components/Modal"
 import { generarId } from "./Helpers"
 import ListadoGastos from "./Components/ListadoGastos"
+import Filtro from "./Components/Filtro"
 
 function App() {
-  const [presupuesto, setPresupuesto] = useState(0)//State to save the budget
+  const [presupuesto, setPresupuesto] = useState(
+    Number(localStorage.getItem('presupuesto')) ?? 0
+  )//State to save the budget in the local storage
   const [IsvaluePresupuesto, setIsvaluePresupuesto] = useState(false)//State to validate the budget
   const [modal, setModal] = useState(false)//State to open the modal
   const [animarModal, setAnimarModal] = useState(false)//State to animate the modal
-  const [gastos, setGastos] = useState([])//State to save the bills
+  const [gastos, setGastos] = useState(
+    localStorage.getItem('gastos') ? JSON.parse(localStorage.getItem('gastos')) : []
+  )//State to save the bills
   const [editarGasto, setEditarGasto] = useState({})//State to edit the bills
+  const [filtro, setFiltro] = useState('')//State to filter the bills
+  const [gastosFiltrados, setGastosFiltrados] = useState([])//State to save the filtered bills
 
   useEffect(() => {
     if(Object.keys(editarGasto).length > 0) {
@@ -22,6 +29,28 @@ function App() {
     }, 100)
     }
   }, [editarGasto])
+
+  useEffect(() => {
+    localStorage.setItem('presupuesto', presupuesto ?? 0)
+  },[presupuesto])
+
+  useState(() =>{
+    const presupuestoLS = Number(localStorage.getItem('presupuesto')) ?? 0
+    if(presupuestoLS > 0){
+      setIsvaluePresupuesto(true)
+    }
+  },[])
+
+  useEffect(() => {
+    localStorage.setItem('gasto', JSON.stringify(gastos) ?? [])
+  }, [gastos])
+
+  useEffect(() => {
+    if(filtro){
+      const gastosFiltrados = gastos.filter(gasto => gasto.categoria === filtro)
+      setGastosFiltrados(gastosFiltrados)
+  }
+  }, [filtro, gastos])
 
   const HandleModal = () => {
     setModal(true)
@@ -59,6 +88,7 @@ function App() {
     <div className={modal ? "fijar" : ""}>
       <Header
         gastos={gastos}
+        setGastos={setGastos}
         presupuesto={presupuesto}
         setPresupuesto={setPresupuesto}
         IsvaluePresupuesto={IsvaluePresupuesto}
@@ -68,10 +98,16 @@ function App() {
       {IsvaluePresupuesto && (
         <>
           <main>
+            <Filtro 
+              filtro={filtro}
+              setFiltro={setFiltro}
+            />
             <ListadoGastos
               gastos={gastos}
               setEditarGasto={setEditarGasto}
               deleteGasto={deleteGasto}
+              filtro={filtro}
+              gastosFiltrados={gastosFiltrados}
             />
           </main>
           <div className="nuevo-gasto">
